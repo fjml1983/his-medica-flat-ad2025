@@ -21,7 +21,7 @@ Pasos:
      
 Abre una terminal (CMD, PowerShell o Terminal de Linux) y navega a la carpeta creada:
 ```
-cd hismedica-server
+	cd hismedica-server
 ```
   Ejecuta el comando de levantamiento:
 ```
@@ -96,8 +96,8 @@ Ahora presiona la tecla de Windows y busca “Editar las variables de entorno”
 ```
            SDK Tools
 ```
-      Activamos la opción Android SDK Command-line Tools (latest) e instalamos.
-      Volvemos a ejecutar flutter doctor; este nos arrojará un comando, el cual es: flutter doctor android-licenses, Aceptamos todo con y y presionamos Enter.
+ Activamos la opción Android SDK Command-line Tools (latest) e instalamos.
+  Volvemos a ejecutar flutter doctor; este nos arrojará un comando, el cual es: flutter doctor android-licenses, Aceptamos todo con y y presionamos Enter.
 
-    Esto sería todo, ya estás listo para abrir el proyecto en Visual Studio
+  Esto sería todo, ya estás listo para abrir el proyecto en Visual Studio
  
