@@ -58,8 +58,7 @@ Instalamos [Visual Studio Code](https://code.visualstudio.com)
     También es recomendable hacerlo manualmente:
       Explicación de instalación manual de Flutter
 
-      1. Nos dirigimos a la parte que dice “Install Flutter manually”.
-      Descargamos el archivo Flutter_windows_3.38.8-stable.zip.
+      1. Nos dirigimos a la parte que dice “Install Flutter manually”.Descargamos el archivo [flutter_windows_3.38.8-stable.zip](https://storage.googleapis.com/flutter_infra_release/releases/stable/windows/flutter_windows_3.38.8-stable.zip).
 
       2. Ahora vamos al disco local C: y creamos una carpeta con el nombre “development”, y descomprimimos el archivo dentro de esta carpeta.
       3. Ahora abre una terminal (CMD, PowerShell o Terminal de Linux) y navega al archivo bin, el cual se encuentra dentro de la carpeta que descomprimiste.
@@ -94,7 +93,7 @@ Ahora presiona la tecla de Windows y busca “Editar las variables de entorno”
    Buscamos Settings y vamos a Languages & Frameworks.
      Seleccionamos Android SDK.
 ```
-           SDK Tools
+	SDK Tools
 ```
  Activamos la opción Android SDK Command-line Tools (latest) e instalamos.
   Volvemos a ejecutar flutter doctor; este nos arrojará un comando, el cual es: flutter doctor android-licenses, Aceptamos todo con y y presionamos Enter.
