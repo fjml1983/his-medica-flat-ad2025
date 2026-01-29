@@ -8,13 +8,13 @@ Pasos:
     1. Crea una carpeta raíz en tu equipo llamada hismedica-server.
     2. Asegúrate de colocar dentro de esa carpeta los siguientes dos archivos (los cuales contienen la definición de la arquitectura):
 
-	[docker-compose.yml ](Src/Docker/ehrbase)(el orquestador de servicios).
-[hapi.application.yaml](Src/Docker/ehrbase)(la configuración inyectada para habilitar el borrado físico).
+	[docker-compose.yml ](Docker/ehrbase)(el orquestador de servicios).
+[hapi.application.yaml](Docker/ehrbase)(la configuración inyectada para habilitar el borrado físico).
 
  1. Crea una carpeta raíz en tu equipo llamada ehrbase
  2. Asegúrate de colocar dentro de esa carpeta el siguiente archivo
 
-	[docker-compose.yml ](Src/Docker/hapifhir)(el orquestador de servicios).
+	[docker-compose.yml ](Docker/hapifhir)(el orquestador de servicios).
 
    3.Ejecución del despliegue
     Para iniciar los servicios, sigue estos pasos operativos:
