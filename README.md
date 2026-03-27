@@ -13,7 +13,7 @@ Al terminar, podras:
 5. (Opcional) Cargar arquetipos ADL.
 6. Ejecutar la app Flutter y validar el flujo basico de uso.
 
-## 1.1 Contexto de la guia anterior (la que compartiste)
+## 1.1 Contexto de la guia anterior 
 
 Tu guia original estaba planteada en dos despliegues separados:
 
