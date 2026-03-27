@@ -1,0 +1,173 @@
+name: hismedica-stack
+
+services:
+  ehrdb:
+    image: postgres:16
+    container_name: hismedica-ehrdb
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${EHRBASE_DB_NAME:-ehrbase}
+      POSTGRES_USER: ${EHRBASE_DB_USER:-ehrbase}
+      POSTGRES_PASSWORD: ${EHRBASE_DB_PASSWORD:-ehrbase}
+      POSTGRES_INITDB_ARGS: --encoding=UTF8 --locale=en_US.utf8
+      LANG: en_US.utf8
+    volumes:
+      - ehrdb_data:/var/lib/postgresql/data
+      - ./docker/ehrdb-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${EHRBASE_DB_USER:-ehrbase} -d ${EHRBASE_DB_NAME:-ehrbase}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - hismedica_net
+
+  ehrbase:
+    image: ${EHRBASE_IMAGE:-ehrbase/ehrbase:latest}
+    container_name: hismedica-ehrbase
+    restart: unless-stopped
+    depends_on:
+      ehrdb:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:postgresql://ehrdb:5432/${EHRBASE_DB_NAME:-ehrbase}
+      DB_USER: ${EHRBASE_DB_USER:-ehrbase}
+      DB_PASS: ${EHRBASE_DB_PASSWORD:-ehrbase}
+      DB_USER_ADMIN: ${EHRBASE_DB_USER:-ehrbase}
+      DB_PASS_ADMIN: ${EHRBASE_DB_PASSWORD:-ehrbase}
+      DB_DIALECT: POSTGRES
+      SECURITY_AUTHTYPE: NONE
+    ports:
+      - "8081:8080"
+    networks:
+      - hismedica_net
+
+  ehrbase-template-loader:
+    image: curlimages/curl:8.12.1
+    container_name: hismedica-ehrbase-template-loader
+    depends_on:
+      ehrbase:
+        condition: service_started
+    profiles:
+      - templates
+    volumes:
+      - ./docker/ehrbase-templates:/templates:ro
+    entrypoint: ["/bin/sh", "-lc"]
+    command: >
+      'set -e;
+      echo "Waiting for EHRbase endpoint...";
+      for i in $$(seq 1 60); do
+        if curl -fsS "http://ehrbase:8080/ehrbase/rest/openehr/v1/definition/template/adl1.4" >/dev/null; then
+          break;
+        fi;
+        sleep 2;
+      done;
+      found=0;
+      for f in /templates/*.opt /templates/*.xml; do
+        [ -f "$$f" ] || continue;
+        found=1;
+        echo "Uploading template: $$f";
+        curl -fsS -X POST "http://ehrbase:8080/ehrbase/rest/openehr/v1/definition/template/adl1.4" -H "Content-Type: application/xml" --data-binary "@$$f";
+        echo;
+      done;
+      if [ "$$found" = "0" ]; then
+        echo "No template files found in /templates (*.opt, *.xml).";
+        exit 1;
+      fi;
+      echo "Current templates:";
+      curl -fsS "http://ehrbase:8080/ehrbase/rest/openehr/v1/definition/template/adl1.4";
+      echo'
+    networks:
+      - hismedica_net
+
+  ehrbase-archetype-loader:
+    image: curlimages/curl:8.12.1
+    container_name: hismedica-ehrbase-archetype-loader
+    depends_on:
+      ehrbase:
+        condition: service_started
+    profiles:
+      - archetypes
+    volumes:
+      - ./docker/ehrbase-archetypes:/archetypes:ro
+    entrypoint: ["/bin/sh", "-lc"]
+    command: >
+      'set -e;
+      echo "Waiting for EHRbase endpoint...";
+      for i in $$(seq 1 60); do
+        if curl -sS -o /dev/null -w "%{http_code}" "http://ehrbase:8080/ehrbase/rest/openehr/v1/definition/archetype/adl1.4" >/tmp/archetype_status; then
+          break;
+        fi;
+        sleep 2;
+      done;
+      status=$$(cat /tmp/archetype_status || echo 000);
+      if [ "$$status" = "404" ]; then
+        echo "Archetype upload endpoint is not available in this EHRbase version.";
+        echo "Skipping archetype upload.";
+        exit 0;
+      fi;
+      if [ "$$status" -lt 200 ] || [ "$$status" -ge 400 ]; then
+        echo "Could not validate archetype endpoint. HTTP $$status";
+        exit 1;
+      fi;
+      found=0;
+      for f in $$(find /archetypes -type f -name "*.adl" | sort); do
+        found=1;
+        echo "Uploading archetype: $$f";
+        curl -fsS -X POST "http://ehrbase:8080/ehrbase/rest/openehr/v1/definition/archetype/adl1.4" -H "Content-Type: application/text" --data-binary "@$$f" >/dev/null;
+        echo;
+      done;
+      if [ "$$found" = "0" ]; then
+        echo "No archetype files found in /archetypes (*.adl).";
+        exit 1;
+      fi;
+      echo "Archetype upload completed."'
+    networks:
+      - hismedica_net
+
+  fhirdb:
+    image: postgres:16-alpine
+    container_name: hismedica-fhirdb
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${FHIR_DB_NAME:-hapi}
+      POSTGRES_USER: ${FHIR_DB_USER:-hapi}
+      POSTGRES_PASSWORD: ${FHIR_DB_PASSWORD:-hapi}
+    volumes:
+      - fhirdb_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${FHIR_DB_USER:-hapi} -d ${FHIR_DB_NAME:-hapi}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - hismedica_net
+
+  fhir:
+    image: ${FHIR_IMAGE:-hapiproject/hapi:latest}
+    container_name: hismedica-fhir
+    restart: unless-stopped
+    depends_on:
+      fhirdb:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://fhirdb:5432/${FHIR_DB_NAME:-hapi}
+      SPRING_DATASOURCE_USERNAME: ${FHIR_DB_USER:-hapi}
+      SPRING_DATASOURCE_PASSWORD: ${FHIR_DB_PASSWORD:-hapi}
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      HAPI_FHIR_CORS_ENABLED: "true"
+      HAPI_FHIR_CORS_ALLOWED_ORIGIN: "*"
+    ports:
+      - "8080:8080"
+    networks:
+      - hismedica_net
+
+volumes:
+  ehrdb_data:
+  fhirdb_data:
+
+networks:
+  hismedica_net:
+    driver: bridge
