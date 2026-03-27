@@ -15,8 +15,6 @@ Al terminar, podras:
 
 ## 1.1 Contexto de la guia anterior 
 
-Tu guia original estaba planteada en dos despliegues separados:
-
 1. Carpeta `hismedica-server` con su propio `docker-compose.yml` y `hapi.application.yaml`.
 2. Carpeta `ehrbase` con otro `docker-compose.yml`.
 
