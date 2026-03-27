@@ -1,131 +1,163 @@
-# HIS Medica (versión: experimental AD2025)
+# HIS Medica - Guia Completa de Instalacion y Puesta en Marcha
 
-Repositorio para una solución preliminar de un Software de Gestión Hospitalaria de tipo Hospital Information System (HIS), desarrollado en el Tecnológico Nacional de México (TecNM), campus Instituto Tecnológico Superior del Sur de Guanajuato (ITSUR) con el propósito de explorar el uso de las tecnologías EHRBase, HAPI FHIR y su posible integración.
+Esta guia esta pensada para publicarse en GitHub y para que cualquier usuario pueda levantar el proyecto sin conocimiento previo del entorno.
 
-## Pasos para montar el proyecto
+## 1. Objetivo de esta guia
 
-1. Preparación del entorno (Docker Desktop) Pasos:
+Al terminar, podras:
 
-a. Crea una carpeta raíz en tu equipo llamada hismedica-server.
+1. Instalar todas las herramientas necesarias en Windows.
+2. Clonar o descargar el proyecto.
+3. Levantar backend con Docker (EHRbase + HAPI FHIR + PostgreSQL).
+4. Cargar el template obligatorio en EHRbase.
+5. (Opcional) Cargar arquetipos ADL.
+6. Ejecutar la app Flutter y validar el flujo basico de uso.
 
-b. Asegúrate de colocar dentro de esa carpeta los siguientes dos archivos (los cuales contienen la definición de la arquitectura):
+## 1.1 Contexto de la guia anterior (la que compartiste)
 
-[docker-compose.yml](https://github.com/fjml1983/his-medica-flat-ad2025/blob/RodrigoAAG-patch-1/Docker/ehrbase) (el orquestador de servicios). [hapi.application.yaml](https://github.com/fjml1983/his-medica-flat-ad2025/blob/RodrigoAAG-patch-1/Docker/ehrbase) (la configuración inyectada para habilitar el borrado físico).
+Tu guia original estaba planteada en dos despliegues separados:
 
-2. Crea una carpeta raíz en tu equipo llamada ehrbase
+1. Carpeta `hismedica-server` con su propio `docker-compose.yml` y `hapi.application.yaml`.
+2. Carpeta `ehrbase` con otro `docker-compose.yml`.
 
-3. Asegúrate de colocar dentro de esa carpeta el siguiente archivo  
-[docker-compose.yml](https://github.com/fjml1983/his-medica-flat-ad2025/blob/RodrigoAAG-patch-1/Docker/ehrbase) (el orquestador de servicios).
+En esta version del proyecto ya no hace falta mantener dos carpetas ni dos levantamientos separados.
 
-3. Ejecución del despliegue Para iniciar los servicios, sigue estos pasos operativos:
+Ahora todo se levanta desde una sola raiz del repositorio con un solo archivo de orquestacion:
 
-Abre una terminal (CMD, PowerShell o Terminal de Linux) y navega a la carpeta creada:
+1. `docker-compose.yml`
 
+Esto simplifica la instalacion, reduce errores de configuracion y facilita que cualquier usuario nuevo pueda iniciar el sistema con menos pasos.
+
+Si alguien viene del esquema anterior, la equivalencia es:
+
+1. Antes: `cd hismedica-server` + `docker-compose up -d` y luego `cd ehrbase` + `docker-compose up -d`.
+2. Ahora: una sola vez en la raiz del repo: `docker compose up -d`.
+
+## 2. Arquitectura del proyecto
+
+Este repositorio levanta estos servicios con Docker Compose:
+
+1. `ehrdb` (PostgreSQL de EHRbase)
+2. `ehrbase` (servidor openEHR)
+3. `fhirdb` (PostgreSQL de HAPI FHIR)
+4. `fhir` (servidor HAPI FHIR)
+
+Archivo principal de orquestacion:
+
+- `docker-compose.yml`
+
+## 3. Requisitos previos
+
+Sistema operativo recomendado:
+
+- Windows 10 o Windows 11 (64-bit)
+
+Software requerido:
+
+1. Docker Desktop
+2. Git for Windows
+3. Flutter SDK (canal stable)
+4. Android Studio
+5. Visual Studio Code
+
+Extensiones recomendadas de VS Code:
+
+1. Flutter
+2. Dart
+
+## 4. Instalacion del entorno (paso a paso)
+
+### 4.1 Docker Desktop
+
+1. Instala Docker Desktop.
+2. Habilita WSL2 si el instalador lo solicita.
+3. Reinicia el equipo si es necesario.
+4. Abre Docker Desktop y espera a que el motor quede en estado Running.
+
+Validacion:
+
+```powershell
+docker --version
+docker compose version
 ```
-cd hismedica-server
+
+### 4.2 Git for Windows
+
+1. Instala Git for Windows.
+2. Reabre la terminal.
+
+Validacion:
+
+```powershell
+git --version
 ```
 
-Ejecuta el comando de levantamiento:
+### 4.3 Flutter SDK
 
-```
-docker-compose up -d
-```
+1. Descarga Flutter stable para Windows.
+2. Descomprime en `C:\development\flutter`.
+3. Agrega `C:\development\flutter\bin` al PATH.
+4. Cierra y abre terminal nueva.
 
-Ahora navega a la carpeta ehrbase:
+Validacion:
 
-```
-cd ehrbase
-```
-
-Ejecuta el comando de levantamiento:
-
-```
-docker-compose up -d
-```
-
-2. Flutter Nos dirigimos a la página oficial de Flutter  
-[Flutter](https://flutter.dev/)
-
-1. Presionamos Get Started y buscamos la opción de Windows  
-2. Nos pedirá hacer instalación de varias cosas las cuales son:
-
-Instalamos [Git for Windows](https://git-scm.com/install/windows).  
-Instalamos Android Studio (puede ser cualquier versión, pero se recomienda la última).  
-Instalamos [Visual Studio Code](https://code.visualstudio.com/)
-
-## Configuración del entorno de Visual Studio
-
-Pasos:
-
-Descargar [Visual Studio Code](https://code.visualstudio.com/)
-
-1. Dentro de las extensiones de Visual Studio, buscamos la extensión llamada “Flutter Dark Code” (puede ser necesario reiniciar el equipo).  
-2. Dentro de las extensiones también descargaremos la extensión de Dart.
-
-También es recomendable hacerlo manualmente:
-
-Explicación de instalación manual de Flutter
-
-Nos dirigimos a la parte que dice “Install Flutter manually”.
-
-Descargamos el archivo:  
-[flutter_windows_3.38.8-stable.zip](https://storage.googleapis.com/flutter_infra_release/releases/stable/windows/flutter_windows_3.38.8-stable.zip)
-
-Ahora vamos al disco local C: y creamos una carpeta con el nombre “development”, y descomprimimos el archivo dentro de esta carpeta.
-
-Ahora abre una terminal (CMD, PowerShell o Terminal de Linux) y navega al archivo bin:
-
-```
-cd C:\development\flutter\bin
-```
-
-Ahora ejecuta:
-
-```
+```powershell
+flutter --version
 flutter doctor
 ```
 
-Ahora presiona la tecla de Windows y busca “Editar las variables de entorno”.
+### 4.4 Android Studio
 
-Presionamos Variables de entorno → Path → Editar → Nuevo:
+1. Instala Android Studio.
+2. Instala Android SDK y Command-line Tools.
+3. Crea un emulador (AVD).
+4. Acepta licencias:
 
-```
-C:\development\flutter_windows_3.38.7-stable\flutter\bin
-```
-
-Damos clic en Aceptar (todas las ventanas).
-
-Cerramos la terminal y la abrimos nuevamente:
-
-```
-flutter doctor
+```powershell
+flutter doctor --android-licenses
 ```
 
-## Configuración Android Studio
+## 5. Descargar el proyecto
 
-Aceptamos todo hasta llegar a la pantalla de inicio.
+### Opcion A: Git clone
 
-Buscamos Settings → Languages & Frameworks → Android SDK
-
-SDK Tools:
-
-Activamos la opción Android SDK Command-line Tools (latest)
-
-Ejecutamos:
-
-```
-flutter doctor android-licenses
+```powershell
+git clone URL_DEL_REPOSITORIO
+cd hismedica
 ```
 
-Aceptamos todo con `y`
+### Opcion B: ZIP
 
----
+1. Descarga el ZIP desde GitHub.
+2. Extrae el contenido.
+3. Abre la carpeta en VS Code.
 
-## Configuración y Preparación de Docker EHR BASE
+## 6. Verificacion rapida de estructura
 
-### Configuración inicial
+Confirma que existan:
 
-Se revisó la configuración del proyecto para confirmar la conexión con EHRbase y el template requerido.
+1. `docker-compose.yml`
+2. `scripts/upload-ehr-templates.ps1`
+3. `scripts/upload-ehr-archetypes.ps1`
+4. `docker/ehrbase-templates`
+5. `docker/ehrbase-archetypes`
+6. `lib/main.dart`
+
+## 7. Levantar backend con Docker
+
+```powershell
+docker compose up -d
+docker compose ps
+```
+
+Servicios esperados:
+
+1. `hismedica-ehrbase`
+2. `hismedica-ehrdb`
+3. `hismedica-fhir`
+4. `hismedica-fhirdb`
+
+## 8. Cargar template obligatorio en EHRbase
 
 Template requerido:
 
@@ -133,110 +165,122 @@ Template requerido:
 his_medica_itsur.historia_clinica_nom004.v1
 ```
 
-Se agregó soporte para:
+### 8.1 Copiar template
 
-- Scripts
-- Docker profile
+Colocar archivo en:
 
-Importante:
+```
+docker/ehrbase-templates
+```
 
-Se detectó que EHRbase no expone el endpoint REST de archetypes.
-
----
-
-## Carga de Template
-
-- Copia archivo .opt  
-- Corrección de scripts  
-- Subida a EHRbase  
-- Verificación con endpoints  
-
----
-
-## Ajustes en la Aplicación
-
-- Ajuste de constantes  
-- Mejora de errores  
-
----
-
-## Documentación
-
-README.md
-
----
-
-## Template y Archetypes Utilizados
-
-Template:
+Ejemplo:
 
 ```
 his_medica_itsur.historia_clinica_nom004.v1.opt
 ```
 
-Template ID:
+### 8.2 Ejecutar script
 
-```
-his_medica_itsur.historia_clinica_nom004.v1
-```
-
----
-
-## Ubicación de Archivos
-
-Archetypes → ehrbase-archetypes  
-Templates → ehrbase-templates  
-
----
-
-## Archivos del Proyecto
-
-- docker-compose.yml  
-- upload-ehr-archetypes.ps1  
-- upload-ehr-templates.ps1  
-- ehr_service.dart  
-- constants.dart  
-- README.md  
-- INSTALACION_COMPLETA.md  
-- .gitkeep  
-
----
-
-## Comandos Principales
-
-```
-docker compose up -d
-docker compose ps
+```powershell
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
-upload-ehr-archetypes.ps1
-upload-ehr-templates.ps1
-curl http://localhost:8081/ehrbase/rest/openehr/v1/definition/template/adl1.4
-curl http://localhost:8081/ehrbase/rest/openehr/v1/definition/template/adl1.4/his_medica_itsur.historia_clinica_nom004.v1/example
+./scripts/upload-ehr-templates.ps1
 ```
 
----
+### 8.3 Verificar template
 
-## Funcionamiento del Sistema
+```powershell
+curl http://localhost:8081/ehrbase/rest/openehr/v1/definition/template/adl1.4
+```
 
-- EHRbase se ejecuta en Docker  
-- Template cargado correctamente  
-- Comunicación activa  
-- Composiciones sin errores  
+## 9. Cargar arquetipos ADL (opcional recomendado)
 
----
+### 9.1 Copiar archivos
 
-## Resultado Final
+```
+docker/ehrbase-archetypes
+```
 
-- Sistema funcional  
-- Template disponible  
-- Scripts reutilizables  
-- Documentación completa  
+### 9.2 Ejecutar script
 
----
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
+./scripts/upload-ehr-archetypes.ps1
+```
 
-## Recomendaciones
+Nota:
 
-- No modificar el Template ID  
-- Mantener archetypes actualizados  
-- Verificar Docker activo  
-- Revisar logs  
+- Un error 404 puede ser normal dependiendo de la version de EHRbase.
+
+## 10. Preparar Flutter y ejecutar app
+
+### 10.1 Instalar dependencias
+
+```powershell
+flutter pub get
+```
+
+### 10.2 Ver dispositivos
+
+```powershell
+flutter devices
+```
+
+### 10.3 Ejecutar en emulador
+
+```powershell
+flutter run -d emulator-5554
+```
+
+### 10.4 Ejecutar en Chrome
+
+```powershell
+flutter run -d chrome
+```
+
+## 11. Validacion funcional minima
+
+1. Crear paciente (EHR)
+2. Crear composicion
+3. Listar composiciones
+
+## 12. Endpoints utiles
+
+- `http://localhost:8081/ehrbase`
+- `http://localhost:8081/ehrbase/rest/openehr/v1/definition/template/adl1.4`
+- `http://localhost:8081/ehrbase/rest/openehr/v1/definition/template/adl1.4/his_medica_itsur.historia_clinica_nom004.v1/example`
+- `http://localhost:8080/fhir/metadata`
+
+## 13. Solucion de problemas frecuentes
+
+### 13.1 Docker no disponible
+
+- Abrir Docker Desktop
+- Esperar estado Running
+- Reintentar
+
+### 13.2 Error PowerShell
+
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
+```
+
+### 13.3 Template no encontrado
+
+1. Verificar carpeta templates
+2. Ejecutar script
+3. Validar endpoint
+
+### 13.4 Error en composicion
+
+- Actualizar repositorio
+- Verificar template
+
+## 14. Arranque rapido
+
+```powershell
+docker compose up -d
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
+./scripts/upload-ehr-templates.ps1
+flutter pub get
+flutter run -d emulator-5554
+```
