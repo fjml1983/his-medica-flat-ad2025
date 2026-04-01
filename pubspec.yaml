@@ -1,0 +1,36 @@
+name: hismedica
+description: "A new Flutter project."
+
+publish_to: 'none' 
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.9.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  http: ^1.2.0
+  cupertino_icons: ^1.0.8
+  sqflite: ^2.2.5 # SQLite para conectar base de datos
+  path_provider: ^2.1.4 # Proveer rutas del sistema de archivos
+  path: ^1.8.3 # Manejo de rutas
+  dropdown_search: ^5.0.3 # Dropdowns con búsqueda avanzada
+  provider: ^6.1.1
+  intl: ^0.19.0
+  uuid: ^4.5.0
+  shared_preferences: ^2.2.2  # ← NUEVA
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+
+  uses-material-design: true
+  assets:
+    - assets/catalogos.db  
+    - assets/composition_template.json
+
